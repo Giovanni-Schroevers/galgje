@@ -1,0 +1,90 @@
+@import 'styles/config';
+
+.wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: $black;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 $defaultSpacing;
+  height: $headerHeight;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 $defaultSpacing;
+  height: $footerHeight;
+}
+
+.content {
+  padding: $defaultSpacing;
+  min-height: calc(100vh - #{$headerHeight});
+}
+
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.letters {
+  width: 800px;
+}
+
+.letter {
+  background-color: white;
+  border: 2px solid black;
+  color: black;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  margin: 5px;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: #4CAF50; /* Green */
+    color: white;
+  }
+
+  &:disabled {
+    background-color: gray;
+    color: white;
+  }
+}
+
+.word {
+  display: flex;
+  flex-direction: row;
+}
+
+.underscore {
+  position: relative;
+  width: 25px;
+  height: 50px;
+  border-bottom: 2px solid black;
+  margin: 10px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.char {
+  position: absolute;
+  bottom:0;
+  left: 30%;
+}
+
+.whitespace {
+  width: 25px;
+}
