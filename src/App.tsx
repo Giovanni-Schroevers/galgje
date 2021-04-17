@@ -1,20 +1,23 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import styles from './App.module.scss';
+import { io } from "socket.io-client";
+
 
 const App: React.FC = () => {
   const [guesses, setGuess] = useState(10)
-  const [word, setWord] = useState("Onderzoeksopdrachtgerichte interceptie")
+  const [word, setWord] = useState("")
   const [guessedLetters, setGuessedLetters] = useState([] as string[])
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split("")
+  const socketRef = useRef<any>(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setWord(e.currentTarget.word.value)
+    socketRef.current.emit('setWord', e.currentTarget.word.value)
   }
   
   const guessWord = (e: any) => {
     e.preventDefault()
-    const letter = e.currentTarget.value
+    const letter = e.currentTarget.word.value
     setGuessedLetters(guessedLetters => [...guessedLetters, letter])
     if (word.indexOf(letter) > -1) {
       return
@@ -22,6 +25,13 @@ const App: React.FC = () => {
       setGuess(guesses-1)
     }
   }
+
+  useEffect(() => {
+    socketRef.current = io("localhost:8000")
+    socketRef.current.on("setWord", (data: string) => {
+      setWord(data);
+    })
+  }, [])
 
   return (
     <div className={styles.wrapper}>
@@ -45,7 +55,7 @@ const App: React.FC = () => {
                   letter !== " " ?
                   <div key={index} className={styles.underscore}><span className={styles.char}>{guessedLetters.indexOf(letter) > -1 && letter}</span></div>
                   :
-                  <div className={styles.whitespace}></div>
+                  <div key={index} className={styles.whitespace}></div>
                 )
               }
             </div>
