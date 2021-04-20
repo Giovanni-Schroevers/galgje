@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 
 
 const App: React.FC = () => {
-  const [guesses, setGuess] = useState(10)
+  const [guesses, setGuess] = useState(0)
   const [word, setWord] = useState("")
   const [guessedLetters, setGuessedLetters] = useState([] as string[])
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split("")
@@ -12,17 +12,17 @@ const App: React.FC = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    socketRef.current.emit('setWord', e.currentTarget.word.value)
+    socketRef.current.emit('setWord', e.currentTarget.word.value.toLowerCase())
   }
   
   const guessWord = (e: any) => {
     e.preventDefault()
-    const letter = e.currentTarget.word.value
+    const letter = e.currentTarget.value
     setGuessedLetters(guessedLetters => [...guessedLetters, letter])
     if (word.indexOf(letter) > -1) {
-      return
+      socketRef.current.emit('correctGuess', letter)
     } else {
-      setGuess(guesses-1)
+      socketRef.current.emit('incorrectGuess', letter)
     }
   }
 
@@ -30,6 +30,12 @@ const App: React.FC = () => {
     socketRef.current = io("localhost:8000")
     socketRef.current.on("setWord", (data: string) => {
       setWord(data);
+    })
+    socketRef.current.on("setGuesses", (data: number) => {
+      setGuess(data);
+    })
+    socketRef.current.on("setGuesedLetters", (data: string[]) => {
+      setGuessedLetters(data);
     })
   }, [])
 

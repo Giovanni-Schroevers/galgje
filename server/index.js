@@ -8,12 +8,15 @@ const io = require("socket.io")(server, {
 });
 
 let serverWord = "";
+let guesses = 10;
+let guessedLetters = [];
 
 io.on('connection', (socket) => {
   console.log("A user has connected")
-  if (serverWord) {
-    io.emit('setWord', serverWord);
-  }
+  io.emit('setWord', serverWord);
+  io.emit('setGuesses', guesses);
+  io.emit('setGuesedLetters', guessedLetters);
+
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
@@ -21,6 +24,18 @@ io.on('connection', (socket) => {
   socket.on('setWord', (word) => {
     serverWord = word;
     io.emit('setWord', word);
+  });
+
+  socket.on('correctGuess', (letter) => {
+    guessedLetters.push(letter);
+    io.emit('setGuesedLetters', guessedLetters);
+  });
+
+  socket.on('incorrectGuess', (letter) => {
+    guessedLetters.push(letter);
+    guesses = guesses-1;
+    io.emit('setGuesses', guesses);
+    io.emit('setGuesedLetters', guessedLetters);
   });
 })
 
