@@ -37,7 +37,35 @@ io.on('connection', (socket) => {
     io.emit('setGuesses', guesses);
     io.emit('setGuesedLetters', guessedLetters);
   });
+
+  if (guesses <= 0) {
+    io.emit('loss');
+  } else if (checkIfWordGuessed()){
+    io.emit('win');
+  }
+
+  socket.on('reset', () => {
+    restart();
+  });
 })
+
+const checkIfWordGuessed = () => {
+  for (const letter of serverWord) {
+    if (guessedLetters.indexOf(letter) === -1) {
+      return false;
+    }
+  }
+  return true
+}
+
+const restart = () => {
+  serverWord = "";
+  guesses = 10;
+  guessedLetters = [];
+  io.emit('setWord', serverWord);
+  io.emit('setGuesses', guesses);
+  io.emit('setGuesedLetters', guessedLetters);
+}
 
 server.listen(8000, () => {
   console.log('listening on *:8000');

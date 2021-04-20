@@ -4,26 +4,32 @@ import { io } from "socket.io-client";
 
 
 const App: React.FC = () => {
-  const [guesses, setGuess] = useState(0)
-  const [word, setWord] = useState("")
-  const [guessedLetters, setGuessedLetters] = useState([] as string[])
-  const letters = 'abcdefghijklmnopqrstuvwxyz'.split("")
+  const [guesses, setGuess] = useState(0);
+  const [word, setWord] = useState("");
+  const [guessedLetters, setGuessedLetters] = useState([] as string[]);
+  const [gameover, setGameover] = useState(false);
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split("");
   const socketRef = useRef<any>(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    socketRef.current.emit('setWord', e.currentTarget.word.value.toLowerCase())
+    e.preventDefault();
+    socketRef.current.emit('setWord', e.currentTarget.word.value.toLowerCase());
   }
   
   const guessWord = (e: any) => {
-    e.preventDefault()
-    const letter = e.currentTarget.value
-    setGuessedLetters(guessedLetters => [...guessedLetters, letter])
+    e.preventDefault();
+    const letter = e.currentTarget.value;
+    setGuessedLetters(guessedLetters => [...guessedLetters, letter]);
     if (word.indexOf(letter) > -1) {
-      socketRef.current.emit('correctGuess', letter)
+      socketRef.current.emit('correctGuess', letter);
     } else {
-      socketRef.current.emit('incorrectGuess', letter)
+      socketRef.current.emit('incorrectGuess', letter);
     }
+  }
+
+  const restart = (e: any) => {
+    e.preventDefault();
+    socketRef.current.emit('reset');
   }
 
   useEffect(() => {
@@ -36,6 +42,12 @@ const App: React.FC = () => {
     })
     socketRef.current.on("setGuesedLetters", (data: string[]) => {
       setGuessedLetters(data);
+    })
+    socketRef.current.on("loss", () => {
+      setGameover(true);
+    })
+    socketRef.current.on("win", () => {
+      setGameover(true);
     })
   }, [])
 
@@ -71,6 +83,9 @@ const App: React.FC = () => {
                 <button onClick={guessWord} value={letter} key={index} className={styles.letter} disabled={guessedLetters.indexOf(letter) > -1}>{letter}</button>
               )}
             </div>
+            {
+              gameover && <button onClick={restart}>Restart</button>
+            }
           </div>
         }
       </div>
