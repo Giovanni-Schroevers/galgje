@@ -33,7 +33,7 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    socketRef.current = io("localhost:8000")
+    socketRef.current = io(process.env.REACT_APP_SERVER_URL || 'localhost:8000')
     socketRef.current.on("setWord", (data: string) => {
       setWord(data);
     })

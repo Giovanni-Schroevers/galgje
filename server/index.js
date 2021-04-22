@@ -1,11 +1,14 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.CLIENT_URL,
   }
 });
+
 
 let serverWord = "";
 let guesses = 10;
@@ -29,6 +32,10 @@ io.on('connection', (socket) => {
   socket.on('correctGuess', (letter) => {
     guessedLetters.push(letter);
     io.emit('setGuesedLetters', guessedLetters);
+
+    if (checkIfWordGuessed() && serverWord){
+      io.emit('win');
+    }
   });
 
   socket.on('incorrectGuess', (letter) => {
@@ -36,12 +43,16 @@ io.on('connection', (socket) => {
     guesses = guesses-1;
     io.emit('setGuesses', guesses);
     io.emit('setGuesedLetters', guessedLetters);
+
+    if (guesses <= 0) {
+      io.emit('loss');
+    }
   });
 
-  if (guesses <= 0) {
-    io.emit('loss');
-  } else if (checkIfWordGuessed()){
+  if (checkIfWordGuessed() && serverWord){
     io.emit('win');
+  } else if (guesses <= 0) {
+    io.emit('loss');
   }
 
   socket.on('reset', () => {
