@@ -1,19 +1,30 @@
 import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import styles from './App.module.scss';
 import { io } from "socket.io-client";
+import Popup from 'components/Popup';
 
 
 const App: React.FC = () => {
   const [guesses, setGuess] = useState(0);
   const [word, setWord] = useState("");
   const [guessedLetters, setGuessedLetters] = useState([] as string[]);
-  const [gameover, setGameover] = useState(false);
+  const [gameState, setGameState] = useState("in progress" as "in progress" | "win" | "loss");
+  const [popupOpen, setPopupOpen] = useState(false);
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split("");
   const socketRef = useRef<any>(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    socketRef.current.emit('setWord', e.currentTarget.word.value.toLowerCase());
+    submitWord(e.currentTarget.word.value);
+  }
+
+  const submitWord = (word: string) => {
+    socketRef.current.emit('reset');
+    socketRef.current.emit('setWord', word.toLowerCase());
+  }
+
+  const handleClose = () => {
+    setPopupOpen(false);
   }
   
   const guessWord = (e: any) => {
@@ -36,6 +47,7 @@ const App: React.FC = () => {
     socketRef.current = io(process.env.REACT_APP_SERVER_URL || 'localhost:8000')
     socketRef.current.on("setWord", (data: string) => {
       setWord(data);
+      setGameState("in progress")
     })
     socketRef.current.on("setGuesses", (data: number) => {
       setGuess(data);
@@ -44,10 +56,12 @@ const App: React.FC = () => {
       setGuessedLetters(data);
     })
     socketRef.current.on("loss", () => {
-      setGameover(true);
+      setGameState("win");
+      setPopupOpen(true)
     })
     socketRef.current.on("win", () => {
-      setGameover(true);
+      setGameState("loss");
+      setPopupOpen(true)
     })
   }, [])
 
@@ -84,11 +98,19 @@ const App: React.FC = () => {
               )}
             </div>
             {
-              gameover && <button onClick={restart}>Restart</button>
+              gameState !== "in progress" && <button onClick={restart}>Restart</button>
             }
           </div>
         }
       </div>
+      <Popup
+        open={popupOpen}
+        text="spul"
+        title="The word has been guessed!"
+        handleClose={handleClose}
+        submitWord={submitWord}
+      />
+
       <footer className={styles.footer} />
     </div>
   )

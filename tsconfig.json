@@ -24,9 +24,9 @@
     "strictNullChecks": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
   },
   "include": [
-    "src"
+    "src/**/*"
   ]
 }
