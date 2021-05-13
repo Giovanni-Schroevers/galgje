@@ -2,6 +2,7 @@ import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import styles from './App.module.scss';
 import { io } from "socket.io-client";
 import Popup from 'components/Popup';
+import { Button } from '@material-ui/core';
 
 
 const App: React.FC = () => {
@@ -22,10 +23,6 @@ const App: React.FC = () => {
     socketRef.current.emit('reset');
     socketRef.current.emit('setWord', word.toLowerCase());
   }
-
-  const handleClose = () => {
-    setPopupOpen(false);
-  }
   
   const guessWord = (e: any) => {
     e.preventDefault();
@@ -36,11 +33,6 @@ const App: React.FC = () => {
     } else {
       socketRef.current.emit('incorrectGuess', letter);
     }
-  }
-
-  const restart = (e: any) => {
-    e.preventDefault();
-    socketRef.current.emit('reset');
   }
 
   useEffect(() => {
@@ -56,11 +48,11 @@ const App: React.FC = () => {
       setGuessedLetters(data);
     })
     socketRef.current.on("loss", () => {
-      setGameState("win");
+      setGameState("loss");
       setPopupOpen(true)
     })
     socketRef.current.on("win", () => {
-      setGameState("loss");
+      setGameState("win");
       setPopupOpen(true)
     })
   }, [])
@@ -94,20 +86,20 @@ const App: React.FC = () => {
             Guesses: {guesses}
             <div className={styles.letters}>
               {letters.map((letter, index) =>
-                <button onClick={guessWord} value={letter} key={index} className={styles.letter} disabled={guessedLetters.indexOf(letter) > -1}>{letter}</button>
+                <button onClick={guessWord} value={letter} key={index} className={`${styles.letter} ${word.indexOf(letter) > -1 && guessedLetters.indexOf(letter) > -1 ? styles.letterCorrect : `${guessedLetters.indexOf(letter) > -1 && styles.letterWrong}`}`} disabled={guessedLetters.indexOf(letter) > -1 || gameState !== "in progress"}>{letter.toLocaleUpperCase()}</button>
               )}
             </div>
             {
-              gameState !== "in progress" && <button onClick={restart}>Restart</button>
+              gameState !== "in progress" && <Button color="primary" variant="contained" onClick={() => setPopupOpen(true)}>Enter word</Button>
             }
           </div>
         }
       </div>
       <Popup
         open={popupOpen}
-        text="spul"
-        title="The word has been guessed!"
-        handleClose={handleClose}
+        text="Enter a new word to start a new game."
+        title={gameState === "win" ? "The word has been guessed!" : "The word was not guessed in time."}
+        handleClose={() => setPopupOpen(false)}
         submitWord={submitWord}
       />
 

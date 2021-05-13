@@ -54,12 +54,22 @@
   border-radius: 5px;
 
   &:hover {
-    background-color: #4CAF50; /* Green */
+    background-color: #329dc7;
+    color: white;
+  }
+
+  &Correct {
+    background-color: #4CAF50 !important;
+    color: white;
+  }
+  
+  &Wrong {
+    background-color: #d13e24 !important;
     color: white;
   }
 
   &:disabled {
-    background-color: gray;
+    background-color: rgb(158, 157, 157);
     color: white;
   }
 }
